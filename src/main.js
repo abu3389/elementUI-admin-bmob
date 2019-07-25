@@ -6,10 +6,7 @@ import ElementUI from 'element-ui';
 
 import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
 import "babel-polyfill";
-//import  './api/getData';
-import Bmob from "hydrogen-js-sdk";
-
-Bmob.initialize("ef7839cf5660bb28ace9e2854b518e0d","4c01c784545bca7bf06d9d4c8d73891c");
+import 'default-passive-events'
 
 Vue.use(ElementUI, { size: 'small' });
 Vue.prototype.$axios = axios;
