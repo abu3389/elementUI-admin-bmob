@@ -312,8 +312,36 @@
                 this.getData()
             },
             handleDelete(index, row) {
+                let masterKey
                 //阻止事件冒泡
                 this.stopPropagation()
+                this.$prompt('请输入授权码', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then((value) => {
+                    masterKey=value.value;//获取masterKey
+                    console.log("123123",row.objectId,masterKey)
+                    User.delete(row.objectId,masterKey).then((res)=>{//修改用户
+                        console.log("6666676",res)
+                        if(res.msg=='ok'){
+                            this.setMsg(true,'success',"删除用户成功！")
+                            this.pageData.nowPage=1;
+                            this.getData()//刷新列表
+                        }else{
+                            this.setMsg(true,'error',"删除用失败！")
+                        }
+                    }).catch(err => {
+                        this.$message({
+                            type: 'error',
+                            message: err
+                        });
+                    });
+                }).catch((err) => {
+                    this.$message({
+                        type: 'info',
+                        message: '输入取消'
+                    });       
+                });
             },
             submitForm(formName) {
                 this.setMsg(false,'error',"")
@@ -324,15 +352,13 @@
                             delete data.rePassword;//清除不要的项
                             User.set(data).then((res)=>{//注册用户
                                 console.log(res)
-                                if(!res.hasOwnProperty('code')){
-                                    this.boxInfo.showBox=false;
-                                    this.setMsg(true,'success',"创建用户成功！")
-                                    this.pageData.nowPage=1;
-                                    this.getData()//刷新列表
-                                }else{
-                                    this.setMsg(true,'error',"错误码：" + res.code+"错误原因：" + res.error)
-                                }
-                            })
+                                this.boxInfo.showBox=false;
+                                this.setMsg(true,'success',"创建用户成功！")
+                                this.pageData.nowPage=1;
+                                this.getData()//刷新列表
+                            }).catch(err => {
+                                this.setMsg(true,'error',"错误码：" + err.code+"错误原因：" + err.error)
+                            });
                         }else{//修改
                             let masterKey=data.masterKey;//获取masterKey
                             data.id=this.boxInfo.status;//获取用户id
@@ -343,7 +369,9 @@
                             delete data.masterKey;//清除不要的项
                             
                             User.update(data,masterKey).then((res)=>{//修改用户
-                                console.log("666666",res)
+                                if(res.hasOwnProperty('code')){
+                                    this.setMsg(true,'error',"错误码：" + res.code+"错误原因：" + res.error)
+                                }
                             }).catch(err => {
                                 console.log("666666",err)
                                 if(err=='TypeError: Cannot convert undefined or null to object'){

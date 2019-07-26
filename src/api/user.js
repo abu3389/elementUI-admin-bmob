@@ -52,10 +52,6 @@ var User = {
             for (var key in params) {
                 query.set(key, params[key]);
             }
-            //bmob会报错 因为找不到本地存储
-            // if(!window.localStorage.getItem("bmob")){
-            //     window.localStorage.setItem("bmob",'')
-            // }
             query.save().then(res => {
                 resolve(res)
             }).catch(err => {
@@ -64,8 +60,18 @@ var User = {
         })
     },
     //删除用户
-    delete:()=>{
-
+    delete:(objectId,MasterKey)=>{
+        return new Promise((resolve, reject) => {
+            console.log(objectId,MasterKey)
+            //初始化时，多传入一个参数
+            Bmob.initialize(SecretKey , SafeKey, MasterKey);
+            const query = Bmob.Query('_User');
+            query.destroy(objectId).then(res => {
+                resolve(res)
+            }).catch(err => {
+                reject(err)
+            })
+        })
     }
 }
 export {
