@@ -91,6 +91,10 @@
                 <input type="password" style="width: 0;position: absolute;border:none"/>
                 <input type="text" style="width: 0;position: absolute;border:none"/>
                 <!-- 用来防止浏览器自动填充表单 -->
+                <el-form-item label="上传头像"  prop="username">
+                    <el-button type="primary" plain  icon="el-icon-s-promotion" @click="uploadFile">选择文件</el-button>
+                    <input type="file" ref='file' @change="head_change" style="display:none">
+                </el-form-item>
                 <el-form-item label="用户名"  prop="username">
                     <el-input v-model="userForm.username"></el-input>
                 </el-form-item>
@@ -267,7 +271,7 @@
                     this.boxInfo.status=''
                 }else{//编辑
                     this.boxInfo.status=row.objectId
-                    this.userForm=row
+                    this.userForm=Object.assign({},row);//深拷贝，防止弹窗数据改动未保存就影响到表格数据
                     if(process.env.NODE_ENV === 'development'){//是授权码的情况，方便调试打包可删除
                         this.userForm.masterKey="59271495ba8f69c7f42372716aced778"
                     }
@@ -404,6 +408,12 @@
                        this.boxInfo.showMsg=false;
                     }, 3000);
                 }
+            },
+            head_change(){
+
+            },
+            uploadFile(){
+                this.$refs.file.click();
             }
         }
     }
