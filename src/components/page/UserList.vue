@@ -91,9 +91,12 @@
                 <input type="password" style="width: 0;position: absolute;border:none"/>
                 <input type="text" style="width: 0;position: absolute;border:none"/>
                 <!-- 用来防止浏览器自动填充表单 -->
-                <el-form-item label="上传头像"  prop="username">
-                    <el-button type="primary" plain  icon="el-icon-s-promotion" @click="uploadFile">选择文件</el-button>
+                <el-form-item label="上传头像">
                     <input type="file" ref='file' @change="head_change" style="display:none">
+                    <el-avatar :src="userForm.userHead"></el-avatar>
+                    <el-input type="text" v-model="userForm.userHead" :disabled='true'>
+                        <el-button type="primary" plain  slot="append" icon="el-icon-s-promotion" @click="uploadFile">选择文件</el-button>
+                    </el-input>
                 </el-form-item>
                 <el-form-item label="用户名"  prop="username">
                     <el-input v-model="userForm.username"></el-input>
@@ -285,6 +288,7 @@
                 this.userForm={
                    emailVerified:false,
                    mobilePhoneNumberVerified:false,
+                   userHead:'static/img/img.jpg',
                 };
             },
             rowClick(data,index){
@@ -409,8 +413,16 @@
                     }, 3000);
                 }
             },
-            head_change(){
-
+            head_change(fileObj){
+                User.upFile(fileObj).then((res)=>{//注册用户
+                    console.log(res)
+                    this.$nextTick(()=>{
+                        this.userForm.userHead=res[0].url;
+                        console.log(this.userForm)
+                    })
+                }).catch(err => {
+                    this.setMsg(true,'error',"错误码：" + err.code+"错误原因：" + err.error)
+                });
             },
             uploadFile(){
                 this.$refs.file.click();
