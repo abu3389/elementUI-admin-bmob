@@ -77,16 +77,12 @@ var User = {
         return new Promise((resolve, reject) => {
             const fileAry = fileObj.target.files
             console.log("file",fileAry)
-            // var file= Bmob.File(fileAry[0].name, [fileAry[0]]);;
             var file
             for(let item of fileAry){
                 console.log("传入SDK文件信息:",item.name,item)
                 file = Bmob.File(item.name, item);
-                // file = Bmob.File(item.name, [item]);
             }
             console.log("传入完成开始上传:")
-            //初始换Bomb防止文件累加上传
-            // initBmob()
             file.save().then(res => {
                 resolve(res)
             }).catch(err => {
@@ -94,6 +90,16 @@ var User = {
             })
             //清除文本值方便下次触发change
             fileObj.target.value = null;
+        })
+    },
+    loginIn:(loginData)=>{
+        return new Promise((resolve, reject) => {
+            Bmob.functions('login', loginData).then((res)=>{
+                resolve(res)
+            })
+            .catch((err)=>{
+                reject(err)
+            });
         })
     }
 }

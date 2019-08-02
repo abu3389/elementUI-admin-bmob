@@ -92,7 +92,7 @@
                 <input type="text" style="width: 0;position: absolute;border:none"/>
                 <!-- 用来防止浏览器自动填充表单 -->
                 <el-form-item label="上传头像">
-                    <input type="file" ref='file' @change="head_change" style="display:none">
+                    <input type="file" ref='file' @change="head_change"  accept="image/*" style="display:none">
                     <el-avatar :src="userForm.userHead"></el-avatar>
                     <el-input type="text" v-model="userForm.userHead" :disabled='true'>
                         <el-button type="primary" plain  slot="append" icon="el-icon-s-promotion" @click="uploadFile">选择文件</el-button>
@@ -275,9 +275,9 @@
                 }else{//编辑
                     this.boxInfo.status=row.objectId
                     this.userForm=Object.assign({},row);//深拷贝，防止弹窗数据改动未保存就影响到表格数据
-                    if(process.env.NODE_ENV === 'development'){//是授权码的情况，方便调试打包可删除
-                        this.userForm.masterKey="59271495ba8f69c7f42372716aced778"
-                    }
+                    // if(process.env.NODE_ENV === 'development'){//是授权码的情况，方便调试打包可删除
+                    //     this.userForm.masterKey="YOU MASTER KEY"
+                    // }
                     console.log(row)
                 }
             },
