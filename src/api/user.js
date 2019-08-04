@@ -1,5 +1,4 @@
-import Bmob from "@/api/baseConfig/baseConfig";
-import {SecretKey ,SafeKey} from "@/api/baseConfig/appkey";
+import {Bmob,initMasterBomb,initBmob} from "@/api/baseConfig/baseConfig";
 
 var User = {
     //获取用户信息
@@ -47,15 +46,11 @@ var User = {
         return new Promise((resolve, reject) => {
             console.log(params,MasterKey)
             //初始化时，多传入一个参数
-            Bmob.initialize(SecretKey , SafeKey, MasterKey);
+            initMasterBomb(MasterKey);
             const query = Bmob.Query('_User');
             for (var key in params) {
                 query.set(key, params[key]);
             }
-            //bmob会报错 因为找不到本地存储
-            // if(!window.localStorage.getItem("bmob")){
-            //     window.localStorage.setItem("bmob",'')
-            // }
             query.save().then(res => {
                 resolve(res)
             }).catch(err => {
@@ -64,8 +59,48 @@ var User = {
         })
     },
     //删除用户
-    delete:()=>{
-
+    delete:(objectId,MasterKey)=>{
+        return new Promise((resolve, reject) => {
+            console.log(objectId,MasterKey)
+            //初始化时，多传入一个参数
+            initMasterBomb(MasterKey);
+            const query =Bmob.Query('_User');
+            query.destroy(objectId).then(res => {
+                resolve(res)
+            }).catch(err => {
+                reject(err)
+            })
+        })
+    },
+    //上传文件
+    upFile:(fileObj)=>{
+        return new Promise((resolve, reject) => {
+            const fileAry = fileObj.target.files
+            console.log("file",fileAry)
+            var file
+            for(let item of fileAry){
+                console.log("传入SDK文件信息:",item.name,item)
+                file = Bmob.File(item.name, item);
+            }
+            console.log("传入完成开始上传:")
+            file.save().then(res => {
+                resolve(res)
+            }).catch(err => {
+                reject(err)
+            })
+            //清除文本值方便下次触发change
+            fileObj.target.value = null;
+        })
+    },
+    loginIn:(loginData)=>{
+        return new Promise((resolve, reject) => {
+            Bmob.functions('login', loginData).then((res)=>{
+                resolve(res)
+            })
+            .catch((err)=>{
+                reject(err)
+            });
+        })
     }
 }
 export {

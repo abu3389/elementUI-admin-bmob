@@ -12,13 +12,15 @@
                 <div class="login-btn">
                     <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
                 </div>
-                <p style="font-size:12px;line-height:30px;color:#999;">Tips : 用户名和密码随便填。</p>
+                <p style="font-size:12px;line-height:30px;color:#999;">Tips : 欢迎登陆！</p>
             </el-form>
         </div>
+        <vue-particles color="#fff" :linesWidth="2"></vue-particles>
     </div>
 </template>
 
 <script>
+    import {User} from '@/api/user'
     export default {
         data: function(){
             return {
@@ -40,8 +42,14 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        localStorage.setItem('ms_username',this.ruleForm.username);
-                        this.$router.push('/');
+                        //发送登陆请求
+                        User.loginIn(this.ruleForm).then((res)=>{//注册用户
+                            console.log(res)
+                        }).catch(err => {
+                            console.log(err)
+                        });
+                        // localStorage.setItem('ms_username',this.ruleForm.username);
+                        // this.$router.push('/');
                     } else {
                         console.log('error submit!!');
                         return false;

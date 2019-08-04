@@ -91,6 +91,13 @@
                 <input type="password" style="width: 0;position: absolute;border:none"/>
                 <input type="text" style="width: 0;position: absolute;border:none"/>
                 <!-- 用来防止浏览器自动填充表单 -->
+                <el-form-item label="上传头像">
+                    <input type="file" ref='file' @change="head_change"  accept="image/*" style="display:none">
+                    <el-avatar :src="userForm.userHead"></el-avatar>
+                    <el-input type="text" v-model="userForm.userHead" :disabled='true'>
+                        <el-button type="primary" plain  slot="append" icon="el-icon-s-promotion" @click="uploadFile">选择文件</el-button>
+                    </el-input>
+                </el-form-item>
                 <el-form-item label="用户名"  prop="username">
                     <el-input v-model="userForm.username"></el-input>
                 </el-form-item>
@@ -267,10 +274,10 @@
                     this.boxInfo.status=''
                 }else{//编辑
                     this.boxInfo.status=row.objectId
-                    this.userForm=row
-                    if(process.env.NODE_ENV === 'development'){//是授权码的情况，方便调试打包可删除
-                        this.userForm.masterKey="59271495ba8f69c7f42372716aced778"
-                    }
+                    this.userForm=Object.assign({},row);//深拷贝，防止弹窗数据改动未保存就影响到表格数据
+                    // if(process.env.NODE_ENV === 'development'){//是授权码的情况，方便调试打包可删除
+                    //     this.userForm.masterKey="YOU MASTER KEY"
+                    // }
                     console.log(row)
                 }
             },
@@ -281,6 +288,7 @@
                 this.userForm={
                    emailVerified:false,
                    mobilePhoneNumberVerified:false,
+                   userHead:'static/img/img.jpg',
                 };
             },
             rowClick(data,index){
@@ -312,8 +320,36 @@
                 this.getData()
             },
             handleDelete(index, row) {
+                let masterKey
                 //阻止事件冒泡
                 this.stopPropagation()
+                this.$prompt('请输入授权码', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then((value) => {
+                    masterKey=value.value;//获取masterKey
+                    console.log("123123",row.objectId,masterKey)
+                    User.delete(row.objectId,masterKey).then((res)=>{//修改用户
+                        console.log("6666676",res)
+                        if(res.msg=='ok'){
+                            this.setMsg(true,'success',"删除用户成功！")
+                            this.pageData.nowPage=1;
+                            this.getData()//刷新列表
+                        }else{
+                            this.setMsg(true,'error',"删除用失败！")
+                        }
+                    }).catch(err => {
+                        this.$message({
+                            type: 'error',
+                            message: err
+                        });
+                    });
+                }).catch((err) => {
+                    this.$message({
+                        type: 'info',
+                        message: '输入取消'
+                    });       
+                });
             },
             submitForm(formName) {
                 this.setMsg(false,'error',"")
@@ -324,15 +360,13 @@
                             delete data.rePassword;//清除不要的项
                             User.set(data).then((res)=>{//注册用户
                                 console.log(res)
-                                if(!res.hasOwnProperty('code')){
-                                    this.boxInfo.showBox=false;
-                                    this.setMsg(true,'success',"创建用户成功！")
-                                    this.pageData.nowPage=1;
-                                    this.getData()//刷新列表
-                                }else{
-                                    this.setMsg(true,'error',"错误码：" + res.code+"错误原因：" + res.error)
-                                }
-                            })
+                                this.boxInfo.showBox=false;
+                                this.setMsg(true,'success',"创建用户成功！")
+                                this.pageData.nowPage=1;
+                                this.getData()//刷新列表
+                            }).catch(err => {
+                                this.setMsg(true,'error',"错误码：" + err.code+"错误原因：" + err.error)
+                            });
                         }else{//修改
                             let masterKey=data.masterKey;//获取masterKey
                             data.id=this.boxInfo.status;//获取用户id
@@ -343,7 +377,9 @@
                             delete data.masterKey;//清除不要的项
                             
                             User.update(data,masterKey).then((res)=>{//修改用户
-                                console.log("666666",res)
+                                if(res.hasOwnProperty('code')){
+                                    this.setMsg(true,'error',"错误码：" + res.code+"错误原因：" + res.error)
+                                }
                             }).catch(err => {
                                 console.log("666666",err)
                                 if(err=='TypeError: Cannot convert undefined or null to object'){
@@ -376,6 +412,20 @@
                        this.boxInfo.showMsg=false;
                     }, 3000);
                 }
+            },
+            head_change(fileObj){
+                User.upFile(fileObj).then((res)=>{//注册用户
+                    console.log(res)
+                    this.$nextTick(()=>{
+                        this.userForm.userHead=res[0].url;
+                        console.log(this.userForm)
+                    })
+                }).catch(err => {
+                    this.setMsg(true,'error',"错误码：" + err.code+"错误原因：" + err.error)
+                });
+            },
+            uploadFile(){
+                this.$refs.file.click();
             }
         }
     }

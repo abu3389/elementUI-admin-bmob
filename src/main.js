@@ -3,12 +3,15 @@ import App from './App';
 import router from './router';
 import axios from 'axios';
 import ElementUI from 'element-ui';
+import VueParticles from 'vue-particles'
 
 import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
 import "babel-polyfill";
 import 'default-passive-events'
 
 Vue.use(ElementUI, { size: 'small' });
+Vue.use(VueParticles)
+
 Vue.prototype.$axios = axios;
 
 //使用钩子函数对路由进行权限跳转
