@@ -356,6 +356,7 @@
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         let data= JSON.parse(JSON.stringify(this.userForm));
+                        data.password=MD5(data.password);//MD5密码加密
                         if(!this.boxInfo.status){//增加
                             delete data.rePassword;//清除不要的项
                             User.set(data).then((res)=>{//注册用户

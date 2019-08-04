@@ -95,6 +95,7 @@ var User = {
     loginIn:(loginData)=>{
         return new Promise((resolve, reject) => {
             Bmob.functions('login', loginData).then((res)=>{
+                res.data=res.data ? JSON.parse(res.data) : ""
                 resolve(res)
             })
             .catch((err)=>{

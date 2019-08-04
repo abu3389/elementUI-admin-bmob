@@ -51,13 +51,14 @@
             return {
                 collapse: false,
                 fullscreen: false,
-                name: 'linxin',
+                name: 'null',
                 message: 2
             }
         },
         computed:{
             username(){
-                let username = localStorage.getItem('ms_username');
+                let user=JSON.parse(localStorage.getItem('ms_username'))
+                let username = user.username;
                 return username ? username : this.name;
             }
         },

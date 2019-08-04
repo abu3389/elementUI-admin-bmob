@@ -21,12 +21,13 @@
 
 <script>
     import {User} from '@/api/user'
+    import MD5 from 'js-md5';
     export default {
         data: function(){
             return {
                 ruleForm: {
                     username: 'admin',
-                    password: '123123'
+                    password: '123456'
                 },
                 rules: {
                     username: [
@@ -43,16 +44,28 @@
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         //发送登陆请求
-                        User.loginIn(this.ruleForm).then((res)=>{//注册用户
+                        let sendData=Object.assign({},this.ruleForm)
+                        sendData.password=MD5(sendData.password);
+                        User.loginIn(sendData).then((res)=>{//登录用户
                             console.log(res)
+                            if(res.status=="100"){//成功
+                                this.$message({
+                                    type: 'success',
+                                    message: res.message
+                                });
+                                //用户信息存入本地存储
+                                localStorage.setItem('ms_username',JSON.stringify(res.data));
+                                //跳转管理界面
+                                this.$router.push('/');
+                            }else{//失败
+                                this.$message({
+                                    type: 'error',
+                                    message: res.message
+                                });
+                            }
                         }).catch(err => {
                             console.log(err)
                         });
-                        // localStorage.setItem('ms_username',this.ruleForm.username);
-                        // this.$router.push('/');
-                    } else {
-                        console.log('error submit!!');
-                        return false;
                     }
                 });
             }

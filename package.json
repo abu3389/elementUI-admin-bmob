@@ -15,6 +15,7 @@
     "default-passive-events": "^1.0.10",
     "element-ui": "2.10.0",
     "hydrogen-js-sdk": "^2.1.0",
+    "js-md5": "^0.7.3",
     "mavon-editor": "^2.5.4",
     "vue": "^2.5.16",
     "vue-cropperjs": "^2.2.0",
@@ -57,7 +58,7 @@
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-cli": "^3.3.5",
-    "webpack-dev-server": "^2.9.7",
+    "webpack-dev-server": "^2.11.5",
     "webpack-merge": "^4.1.0"
   },
   "engines": {
