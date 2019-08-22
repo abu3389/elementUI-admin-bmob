@@ -60,7 +60,7 @@
                             }else{//失败
                                 this.$message({
                                     type: 'error',
-                                    message: res.messagegit 
+                                    message: res.message
                                 });
                             }
                         }).catch(err => {

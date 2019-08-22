@@ -27,7 +27,7 @@
                 <el-input style="width:200px;" placeholder="请输入内容" clearable v-model="searchInfo.word"></el-input>
                 <el-button @click="reSetSearch" style="margin-left:15px;" round icon="el-icon-refresh-left" type="danger">刷新</el-button>
                 <el-button @click="searchEvent" style="margin-right:20px;" round icon="el-icon-search">搜索</el-button>
-                <el-button @click="handleEdit('userForm')" style="margin-right:20px;" type="primary" icon="el-icon-plus">添加用户</el-button>
+                <el-button @click="handleEdit" style="margin-right:20px;" type="primary" icon="el-icon-plus">添加用户</el-button>
             </div>
             <el-table :data="tableData"  v-loading="loading" border style="width: 100%" ref="userTable" @row-click="rowClick">
                 <el-table-column
@@ -56,10 +56,11 @@
                 </el-table-column>
                 <el-table-column prop="createdAt" label="创建日期" align="center" sortable></el-table-column>
                 <el-table-column prop="updatedAt" label="修改日期" align="center" sortable></el-table-column>
-                <el-table-column fixed="right" label="操作" width="150" align="center">
+                <el-table-column fixed="right" label="操作" align="center" width="230px">
                     <template slot-scope="scope">
-                        <el-button size="small" @click="handleEdit('userForm',scope.$index, scope.row)">编辑</el-button>
-                        <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                        <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                        <el-button size="mini" @click="handleReSetPass(scope.$index, scope.row)">改密</el-button>
+                        <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -76,7 +77,7 @@
                 >
             </el-pagination>
         </div>
-        <el-dialog :title="boxInfo.status? '修改用户' : '添加用户'" :visible="boxInfo.showBox" :label-width="boxInfo.labelWidth" :close-on-click-modal="false"  @close="cancelBox('userForm')" width="450px">
+        <el-dialog :title="boxInfo.status? '修改用户' : '添加用户'" :visible="boxInfo.showBox" :label-width="boxInfo.labelWidth" :close-on-click-modal="false"  @close="cancelBox('boxInfo')" width="450px">
             <!-- 错误提示 -->
             <el-alert
                 :title="boxInfo.boxMsg"
@@ -132,8 +133,22 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="cancelBox('userForm')">取消</el-button>
+                <el-button @click="cancelBox('boxInfo')">取消</el-button>
                 <el-button type="primary" @click="submitForm('userForm')">{{boxInfo.status ? '修改' : '添加'}}</el-button>
+            </div>
+        </el-dialog>
+        <el-dialog title="重置登录密码" :visible="forgetPassBox.showBox" :label-width="forgetPassBox.labelWidth" :close-on-click-modal="false"  @close="cancelBox('forgetPassBox')" width="450px">
+            <el-form v-if="forgetPassBox.showBox" :model="forgetForm" ref="forgetForm" :rules="rules" >
+                <el-form-item label="输入新密码" prop="newPassword">
+                        <el-input type="password" v-model="forgetForm.newPassword"></el-input>
+                    </el-form-item>
+                <el-form-item label="授权码" prop="masterKey">
+                    <el-input v-model="forgetForm.masterKey"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="cancelBox('forgetPassBox')">取消</el-button>
+                <el-button type="primary" @click="submitForgetForm('forgetForm')">重置密码</el-button>
             </div>
         </el-dialog>
     </section>
@@ -141,6 +156,7 @@
 
 <script>
     import {User} from '@/api/user'
+    import MD5 from 'md5';
     export default {
         data() {
             var validatePass = (rule, value, callback) => {
@@ -163,15 +179,15 @@
                 }
             };
             return {
-                tableData: [],
-                pageData:{
+                tableData: [],//用户列表
+                pageData:{//分页数据
                    nowPage:1,
                    pageSizes:[5,10,20,50,100],
                    pageSize:5,
                    pageTotal:0,
                 },
-                userForm:{},
-                boxInfo:{
+                userForm:{},//用户信息表单数据
+                boxInfo:{//用户信息盒子设置
                     showBox:false,//是否显示弹窗
                     labelWidth:"100px",//弹窗宽度
                     status:"",//当前编辑状态 添加/修改
@@ -179,7 +195,12 @@
                     boxMsg:"",//显示盒子消息
                     msgType:"",//消息类型 error/success
                 },
-                rules: {
+                forgetForm:{},//重置密码表单数据
+                forgetPassBox:{//重置密码盒子设置
+                    showBox:false,//是否显示弹窗
+                    labelWidth:"100px",//弹窗宽度
+                },
+                rules: {//表单规则
                     username: [
                         { required: true, message: '请输入用户名', trigger: 'blur' },
                         { min: 2, max: 11, message: '长度在 2 到 11个字符', trigger: 'change' }
@@ -190,6 +211,10 @@
                     ],
                     rePassword: [
                         { required: true, validator: validatePass2, trigger: 'blur' },
+                        { min: 6, max: 18, message: '长度在 6 到 18个字符', trigger: 'change' }
+                    ],
+                    newPassword: [
+                        { required: true, message: '请输入密码', trigger: 'blur' },
                         { min: 6, max: 18, message: '长度在 6 到 18个字符', trigger: 'change' }
                     ],
                     email: [
@@ -210,7 +235,7 @@
                         { required: true, message: '授权码不能为空！', trigger: 'blur' },
                     ],
                 },
-                options:[
+                options:[//筛选条件
                     {
                         "value":"ID",
                         "id":'objectId'
@@ -228,11 +253,11 @@
                         "id":'mobilePhoneNumber'
                     }
                 ],
-                searchInfo:{
+                searchInfo:{//搜索数据
                     type:'',
                     word:''
-                },   
-                loading: true
+                },
+                loading: true//表格加载状态
             }
         },
         components:{
@@ -241,7 +266,7 @@
             this.getData()//获取表格数据
         },
         methods: {
-            getData() {
+            getData() {//获取表格数据
                 this.loading = true
                 let data={
                     nowPage:this.pageData.nowPage,
@@ -255,18 +280,18 @@
                     this.loading = false
                 })
             },
-            pageSizeChange(e){//每页显示数量改变
+            pageSizeChange(e){//表格每页显示数量改变
                this.pageData.pageSize=e
                this.getData()
             },
-            nowPageChange(e){//当前页改变
+            nowPageChange(e){//表格当前页改变
                this.pageData.nowPage=e
                this.getData()
             },
-            handleEdit(formName,index,row) {
+            handleEdit(index,row) {//表格行编辑事件
                 //阻止事件冒泡
                 this.stopPropagation()
-                //初始化窗体
+                //初始化用户信息窗体
                 this.initBox();
                 console.log(row)
                 //判断当前状态
@@ -281,7 +306,7 @@
                     console.log(row)
                 }
             },
-            initBox(){//初始化窗体
+            initBox(){//初始化用户信息窗体
                 this.boxInfo.showBox=true;
                 this.boxInfo.showMsg=false;
                 //初始化窗体数据
@@ -291,7 +316,7 @@
                    userHead:'static/img/img.jpg',
                 };
             },
-            rowClick(data,index){
+            rowClick(data,index){//表格行点击
                this.$refs["userTable"].toggleRowSelection(data)
             },
             //阻止事件冒泡
@@ -303,10 +328,10 @@
                     e.cancelBubble = true; //IE阻止冒泡方法 
                 } 
             },
-            searchEvent(e){
+            searchEvent(e){//搜索事件
                 this.getData()
             },
-            reSetSearch(){
+            reSetSearch(){//重置搜索数据
                 this.searchInfo={
                    type:'',
                    word:''
@@ -319,10 +344,10 @@
                 }
                 this.getData()
             },
-            handleDelete(index, row) {
-                let masterKey
+            handleDelete(index, row) {//表格行删除事件
                 //阻止事件冒泡
                 this.stopPropagation()
+                let masterKey
                 this.$prompt('请输入授权码', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -351,14 +376,14 @@
                     });       
                 });
             },
-            submitForm(formName) {
+            submitForm(formName) {//提交用户信息表单（增加、修改）
                 this.setMsg(false,'error',"")
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         let data= JSON.parse(JSON.stringify(this.userForm));
-                        data.password=MD5(data.password);//MD5密码加密
                         if(!this.boxInfo.status){//增加
                             delete data.rePassword;//清除不要的项
+                            data.password=MD5(data.password);//MD5密码加密
                             User.set(data).then((res)=>{//注册用户
                                 console.log(res)
                                 this.boxInfo.showBox=false;
@@ -398,13 +423,13 @@
                     }
                 });
             },
-            cancelBox(formName){
-                this.boxInfo.showBox = false;//关闭弹窗
+            cancelBox(name){//关闭用户信息盒子
+                this[name].showBox = false;//关闭弹窗
             },
             resetForm(formName) {//重置表单
                 this.$refs[formName].resetFields();
             },
-            setMsg(isshow,type,msg){
+            setMsg(isshow,type,msg){//设置提示信息
                 this.boxInfo.showMsg=isshow;
                 this.boxInfo.msgType=type
                 this.boxInfo.boxMsg=msg
@@ -414,7 +439,7 @@
                     }, 3000);
                 }
             },
-            head_change(fileObj){
+            head_change(fileObj){//用户头像改变事件
                 User.upFile(fileObj).then((res)=>{//注册用户
                     console.log(res)
                     this.$nextTick(()=>{
@@ -425,9 +450,29 @@
                     this.setMsg(true,'error',"错误码：" + err.code+"错误原因：" + err.error)
                 });
             },
-            uploadFile(){
+            uploadFile(){//点击上传文件
                 this.$refs.file.click();
-            }
+            },
+            submitForgetForm(formName){//重置密码表单提交
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                       console.log("123456")
+                    }
+                });
+            },
+            handleReSetPass(index,row){//表格行改密事件
+                //阻止事件冒泡
+                this.stopPropagation()
+                this.initForgetBox()
+            },
+            initForgetBox(){//初始化重置密码窗体
+                this.forgetPassBox.showBox=true;
+                //初始化窗体数据
+                this.forgetForm={
+                   newPassword:'',
+                   masterKey:'',
+                };
+            },
         }
     }
 
