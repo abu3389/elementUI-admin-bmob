@@ -25,9 +25,9 @@
                     </el-option>
                 </el-select>
                 <el-input style="width:200px;" placeholder="请输入内容" clearable v-model="searchInfo.word"></el-input>
-                <el-button @click="reSetSearch" style="margin-left:15px;" round icon="el-icon-refresh-left" type="danger">刷新</el-button>
-                <el-button @click="searchEvent" style="margin-right:20px;" round icon="el-icon-search">搜索</el-button>
-                <el-button @click="handleEdit" style="margin-right:20px;" type="primary" icon="el-icon-plus">添加用户</el-button>
+                <el-button @click="reSetSearch" style="margin-left:15px;" round icon="el-icon-refresh-left" type="success" plain>刷新</el-button>
+                <el-button @click="searchEvent" style="margin-right:20px;" round icon="el-icon-search" plain>搜索</el-button>
+                <el-button @click="handleEdit" style="margin-right:20px;" icon="el-icon-plus" type="primary" plain>添加用户</el-button>
             </div>
             <el-table :data="tableData"  v-loading="loading" border style="width: 100%" ref="userTable" @row-click="rowClick">
                 <el-table-column
@@ -58,9 +58,9 @@
                 <el-table-column prop="updatedAt" label="修改日期" align="center" sortable></el-table-column>
                 <el-table-column fixed="right" label="操作" align="center" width="230px">
                     <template slot-scope="scope">
-                        <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                        <el-button size="mini" @click="handleReSetPass(scope.$index, scope.row)">改密</el-button>
-                        <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                        <el-button size="mini" type="primary" plain @click="handleEdit($event, scope.$index, scope.row)">编辑</el-button>
+                        <el-button size="mini" type="warning" plain @click="handleReSetPass(scope.$index, scope.row)">改密</el-button>
+                        <el-button size="mini" type="danger" plain @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -94,9 +94,10 @@
                 <!-- 用来防止浏览器自动填充表单 -->
                 <el-form-item label="上传头像">
                     <input type="file" ref='file' @change="head_change"  accept="image/*" style="display:none">
-                    <el-avatar :src="userForm.userHead"></el-avatar>
+                    <el-avatar :src="userForm.userHead" :key="userForm.userHead"></el-avatar>
                     <el-input type="text" v-model="userForm.userHead" :disabled='true'>
                         <el-button type="primary" plain  slot="append" icon="el-icon-s-promotion" @click="uploadFile">选择文件</el-button>
+                        <el-button type="danger" plain  slot="append" icon="el-icon-refresh-left" @click="reSetHead">恢复默认</el-button>
                     </el-input>
                 </el-form-item>
                 <el-form-item label="用户名"  prop="username">
@@ -190,7 +191,7 @@
                 boxInfo:{//用户信息盒子设置
                     showBox:false,//是否显示弹窗
                     labelWidth:"100px",//弹窗宽度
-                    status:"",//当前编辑状态 添加/修改
+                    status:"",//当前编辑状态的id
                     showMsg:false,
                     boxMsg:"",//显示盒子消息
                     msgType:"",//消息类型 error/success
@@ -199,6 +200,7 @@
                 forgetPassBox:{//重置密码盒子设置
                     showBox:false,//是否显示弹窗
                     labelWidth:"100px",//弹窗宽度
+                    status:""//当前编辑状态的id
                 },
                 rules: {//表单规则
                     username: [
@@ -288,12 +290,12 @@
                this.pageData.nowPage=e
                this.getData()
             },
-            handleEdit(index,row) {//表格行编辑事件
+            handleEdit(e,index,row) {//表格行编辑事件
                 //阻止事件冒泡
                 this.stopPropagation()
                 //初始化用户信息窗体
                 this.initBox();
-                console.log(row)
+                console.log(index,row)
                 //判断当前状态
                 if(typeof(index)=="undefined"){//添加
                     this.boxInfo.status=''
@@ -303,7 +305,6 @@
                     // if(process.env.NODE_ENV === 'development'){//是授权码的情况，方便调试打包可删除
                     //     this.userForm.masterKey="YOU MASTER KEY"
                     // }
-                    console.log(row)
                 }
             },
             initBox(){//初始化用户信息窗体
@@ -361,7 +362,7 @@
                             this.pageData.nowPage=1;
                             this.getData()//刷新列表
                         }else{
-                            this.setMsg(true,'error',"删除用失败！")
+                            this.setMsg(true,'error',"删除用户失败！")
                         }
                     }).catch(err => {
                         this.$message({
@@ -402,21 +403,7 @@
                             delete data.objectId;//清除不要的项
                             delete data.masterKey;//清除不要的项
                             
-                            User.update(data,masterKey).then((res)=>{//修改用户
-                                if(res.hasOwnProperty('code')){
-                                    this.setMsg(true,'error',"错误码：" + res.code+"错误原因：" + res.error)
-                                }
-                            }).catch(err => {
-                                console.log("666666",err)
-                                if(err=='TypeError: Cannot convert undefined or null to object'){
-                                    this.boxInfo.showBox=false;
-                                    this.setMsg(true,'success',"修改用户成功！")
-                                    this.pageData.nowPage=1;
-                                    this.getData()//刷新列表
-                                }else{
-                                    this.setMsg(true,'error',"错误码：" + err.code+"错误原因：" + err.error)
-                                }
-                            });
+                            this.updateUserInfo(data,masterKey,"用户信息修改成功！",this.boxInfo)
                         }
                     } else {
                         this.setMsg(true,'error',"检验不通过，请检查输入！带*为必填项")
@@ -442,10 +429,7 @@
             head_change(fileObj){//用户头像改变事件
                 User.upFile(fileObj).then((res)=>{//注册用户
                     console.log(res)
-                    this.$nextTick(()=>{
-                        this.userForm.userHead=res[0].url;
-                        console.log(this.userForm)
-                    })
+                    this.userForm.userHead=res[0].url;
                 }).catch(err => {
                     this.setMsg(true,'error',"错误码：" + err.code+"错误原因：" + err.error)
                 });
@@ -453,16 +437,46 @@
             uploadFile(){//点击上传文件
                 this.$refs.file.click();
             },
+            reSetHead(){//重置头像
+                this.userForm.userHead='static/img/img.jpg'
+            },
             submitForgetForm(formName){//重置密码表单提交
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                       console.log("123456")
+                        let data= JSON.parse(JSON.stringify(this.forgetForm));
+                        let masterKey=data.masterKey;//获取masterKey
+                        data.id=this.forgetPassBox.status
+                        data.password=MD5(data.newPassword)
+
+                        delete data.masterKey;//清除不要的项
+                        delete data.newPassword;//清除不要的项
+
+                        this.updateUserInfo(data,masterKey,"用户密码重置成功！",this.forgetPassBox)
+                    }
+                });
+            },
+            updateUserInfo(data,masterKey,successMsg,box){
+                User.update(data,masterKey).then((res)=>{//修改用户
+                    if(res.hasOwnProperty('code')){
+                        this.setMsg(true,'error',"错误码：" + res.code+"错误原因：" + res.error)
+                    }
+                }).catch(err => {
+                    console.log("666666",err)
+                    if(err=='TypeError: Cannot convert undefined or null to object'){
+                        box.showBox=false;
+                        this.setMsg(true,'success',successMsg)
+                        this.pageData.nowPage=1;
+                        this.getData()//刷新列表
+                    }else{
+                        this.setMsg(true,'error',"错误码：" + err.code+"错误原因：" + err.error)
                     }
                 });
             },
             handleReSetPass(index,row){//表格行改密事件
                 //阻止事件冒泡
                 this.stopPropagation()
+                //获取id
+                this.forgetPassBox.status=row.objectId;
                 this.initForgetBox()
             },
             initForgetBox(){//初始化重置密码窗体
