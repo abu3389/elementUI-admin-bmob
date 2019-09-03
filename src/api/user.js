@@ -92,7 +92,7 @@ var User = {
             fileObj.target.value = null;
         })
     },
-    loginIn:(loginData)=>{
+    loginIn:(loginData)=>{//自定义云函数（付费开启）
         return new Promise((resolve, reject) => {
             Bmob.functions('login', loginData).then((res)=>{
                 res.data=res.data ? JSON.parse(res.data) : ""
@@ -102,7 +102,16 @@ var User = {
                 reject(err)
             });
         })
-    }
+    },
+    loginIn2:(loginData)=>{//内置登录函数（免费）
+        return new Promise((resolve, reject) => {
+            Bmob.User.login(loginData.username,loginData.password).then(res => {
+                resolve(res)
+            }).catch(err => {
+                reject(err)
+            });
+        })
+    },
 }
 export {
     User

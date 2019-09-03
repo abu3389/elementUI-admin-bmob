@@ -2,7 +2,7 @@
     <section class="main">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-news"></i> 用户列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-news"></i> 角色列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="container">
@@ -27,7 +27,7 @@
                 <el-input style="width:200px;" placeholder="请输入内容" clearable v-model="searchInfo.word"></el-input>
                 <el-button @click="reSetSearch" style="margin-left:15px;" round icon="el-icon-refresh-left" type="success" plain>刷新</el-button>
                 <el-button @click="searchEvent" style="margin-right:20px;" round icon="el-icon-search" plain>搜索</el-button>
-                <el-button @click="handleEdit" style="margin-right:20px;" icon="el-icon-plus" type="primary" plain>添加用户</el-button>
+                <el-button @click="handleEdit" style="margin-right:20px;" icon="el-icon-plus" type="primary" plain>添加角色</el-button>
             </div>
             <el-table :data="tableData"  v-loading="loading" border style="width: 100%" ref="userTable" @row-click="rowClick">
                 <el-table-column
@@ -59,7 +59,6 @@
                 <el-table-column fixed="right" label="操作" align="center" width="230px">
                     <template slot-scope="scope">
                         <el-button size="mini" type="primary" plain @click="handleEdit($event, scope.$index, scope.row)">编辑</el-button>
-                        <el-button size="mini" type="warning" plain @click="handleReSetPass(scope.$index, scope.row)">改密</el-button>
                         <el-button size="mini" type="danger" plain @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
@@ -77,7 +76,7 @@
                 >
             </el-pagination>
         </div>
-        <el-dialog :title="boxInfo.status? '修改用户' : '添加用户'" :visible="boxInfo.showBox" :label-width="boxInfo.labelWidth" :close-on-click-modal="false"  @close="cancelBox('boxInfo')" width="450px">
+        <el-dialog :title="boxInfo.status? '修改角色' : '添加角色'" :visible="boxInfo.showBox" :label-width="boxInfo.labelWidth" :close-on-click-modal="false"  @close="cancelBox('boxInfo')" width="450px">
             <!-- 错误提示 -->
             <el-alert
                 :title="boxInfo.boxMsg"

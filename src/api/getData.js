@@ -1,4 +1,4 @@
-import Bmob from "@/api/baseConfig/baseConfig";
+import {Bmob,initMasterBomb,initBmob} from "@/api/baseConfig/baseConfig";
 
 
 var Product = {

@@ -5,7 +5,7 @@
   "author": "abu <294333196@qq.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --open --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --open --hot --inline --progress --config build/webpack.dev.conf.js",
     "build": "node build/build.js",
     "build:dll": "webpack --config build/webpack.dll.conf.js"
   },

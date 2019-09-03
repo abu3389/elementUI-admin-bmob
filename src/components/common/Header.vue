@@ -23,11 +23,11 @@
                     <span class="btn-bell-badge" v-if="message"></span>
                 </div> -->
                 <!-- 用户头像 -->
-                <div class="user-avator"><img src="static/img/img.jpg"></div>
+                <div class="user-avator"><img :src="userInfo.userHead ? userInfo.userHead : 'static/img/img.jpg'"></div>
                 <!-- 用户名下拉菜单 -->
                 <el-dropdown class="user-name" trigger="click" @command="handleCommand">
                     <span class="el-dropdown-link">
-                        {{username}} <i class="el-icon-caret-bottom"></i>
+                        {{userInfo.username ? userInfo.username : "暂无用户名"}} <i class="el-icon-caret-bottom"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
                         <!-- <a href="http://blog.gdfengshuo.com/about/" target="_blank">
@@ -51,21 +51,19 @@
             return {
                 collapse: false,
                 fullscreen: false,
-                name: 'null',
                 message: 2
             }
         },
         computed:{
-            username(){
+            userInfo(){
                 let user=JSON.parse(localStorage.getItem('ms_username'))
-                let username = user.username;
-                return username ? username : this.name;
+                return user
             }
         },
         methods:{
             // 用户名下拉菜单选择事件
             handleCommand(command) {
-                if(command == 'loginout'){
+                if(command == 'loginout'){//退出登录
                     localStorage.removeItem('ms_username')
                     this.$router.push('/login');
                 }

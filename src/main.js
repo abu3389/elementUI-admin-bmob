@@ -25,7 +25,7 @@ router.beforeEach((to, from, next) => {
             confirmButtonText: '确定'
         });
         next(false)
-    }else if(!role && to.path !== '/login'){ 
+    }else if(!role && to.path !== '/login'){
         //未登录且前往的是不是登录页的情况
         next('/login');//跳转登录页
     }else if (role && to.path === '/login') {
