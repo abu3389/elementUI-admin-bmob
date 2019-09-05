@@ -2,7 +2,7 @@
     <section class="main">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-news"></i> 角色分类111</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-news"></i> 角色分类</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="container">

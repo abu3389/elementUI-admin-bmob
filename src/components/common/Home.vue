@@ -1,13 +1,16 @@
 <template>
     <div class="wrapper">
+        <!-- 头部 -->
         <v-head></v-head>
-        <v-sidebar></v-sidebar>
+        <!-- 左侧菜单 -->
+        <left-sidebar></left-sidebar>
         <div class="content-box" :class="{'content-collapse':collapse}">
+            <!-- 路由打开标签 -->
             <v-tags></v-tags>
             <div class="content">
                 <transition name="move" mode="out-in">
                     <keep-alive>
-                        <!-- 路由展示 -->
+                        <!-- 路由展示容器 -->
                         <router-view></router-view>
                     </keep-alive>
                 </transition>
@@ -17,10 +20,10 @@
 </template>
 
 <script>
-    import vHead from './Header.vue';
-    import vSidebar from './Sidebar.vue';
-    import vTags from './Tags.vue';
-    import bus from '../common/bus';
+    import vHead from '@/components/common/Header.vue';
+    import leftSidebar from '@/components/common/Menu/LeftMenu.vue';
+    import vTags from '@/components/common/Tags.vue';
+    import bus from '@/components/common/bus';
     export default {
         data(){
             return {
@@ -28,8 +31,8 @@
             }
         },
         components:{
-            vHead, 
-            vSidebar,
+            vHead,
+            leftSidebar,
             vTags
         },
         created(){

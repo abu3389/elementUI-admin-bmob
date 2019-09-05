@@ -18,7 +18,7 @@ Vue.prototype.$axios = axios;
 router.beforeEach((to, from, next) => {
     //获取用户信息
     const role = localStorage.getItem('ms_username');
-    console.log("6666",role,to.path)
+    console.log("6666",role,"to",to.path,"form",from.path)
     //是否是符合浏览器要求
     if(navigator.userAgent.indexOf('MSIE') > -1 && to.path === '/editor'){
         Vue.prototype.$alert('vue-quill-editor组件不兼容IE10及以下浏览器，请使用更高版本的浏览器查看', '浏览器不兼容通知', {

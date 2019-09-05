@@ -1,26 +1,30 @@
 <template>
     <div class="sidebar">
-        <el-menu class="sidebar-el-menu" :default-active="onRoutes" :collapse="collapse" background-color="#324157"
-            text-color="#bfcbd9" active-text-color="#20a0ff" unique-opened router>
+        <el-menu class="sidebar-el-menu" :default-active="$route.path" :collapse="collapse" background-color="#324157"
+            text-color="#bfcbd9" active-text-color="#20a0ff" :unique-opened='false' :router='true'>
             <template v-for="item in items">
+                <!-- 没有子菜单的情况 -->
+                <!-- 直接打印菜单 -->
+                <template v-if="!item.subs">
+                    <el-menu-item :index="item.index" :key="item.index">
+                        <i :class="item.icon"></i>
+                        <span slot="title">{{ item.title }}</span>
+                    </el-menu-item>
+                </template>
                 <!-- 有子菜单的情况 -->
-                <template v-if="item.subs">
+                <template v-else>
+                    <!-- 打印父菜单 -->
                     <el-submenu :index="item.index" :key="item.index">
                         <!-- 父菜单自定义模板 -->
                         <template slot="title">
-                            <i :class="item.icon"></i><span slot="title">{{ item.title }}</span>
+                            <i :class="item.icon"></i>
+                            <span slot="title">{{ item.title }}</span>
                         </template>
                         <!-- 打印子菜单 -->
-                        <el-menu-item v-for="(subItem,i) in item.subs" :key="i" :index="subItem.index" :router="subItem">
-                            <i :class="subItem.icon"></i><span slot="title">{{ subItem.title }}{{item.index+'/'+subItem.index}}</span>
+                        <el-menu-item v-for="subItem in item.subs" :key="subItem.index" :index="item.index+'/'+subItem.index">
+                            <i :class="subItem.icon"></i><span slot="title">{{ subItem.title }}</span>
                         </el-menu-item>
                     </el-submenu>
-                </template>
-                <!-- 没有子菜单的情况 -->
-                <template v-else>
-                    <el-menu-item :index="item.index" :key="item.index">
-                        <i :class="item.icon"></i><span slot="title">{{ item.title }}</span>
-                    </el-menu-item>
                 </template>
             </template>
         </el-menu>
@@ -28,7 +32,7 @@
 </template>
 
 <script>
-    import bus from '../common/bus';
+    import bus from '@/components/common/bus';
     export default {
         data() {
             return {
@@ -46,12 +50,12 @@
                         subs:[
                             {
                                 icon: 'el-icon-news',
-                                index: '/role/list',
+                                index: 'list',
                                 title: '角色列表'
                             },
                             {
                                 icon: 'el-icon-news',
-                                index: '/role/type',
+                                index: 'type',
                                 title: '角色分类'
                             },
                         ]
@@ -72,11 +76,6 @@
                         title: '图片列表'
                     }
                 ]
-            }
-        },
-        computed:{
-            onRoutes(){
-                return this.$route.path.replace('/','');//获取当前路由名称，设置默认选中
             }
         },
         created(){

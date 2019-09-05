@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Home from '@/components/common/Home.vue';
+import pageIndex from '@/components/page/pageIndex.vue';
 
 Vue.use(Router);
 
@@ -18,21 +19,21 @@ export default new Router({
             children:[
                 {
                     path: '/user',
-                    component: () => import('@/components/page/UserList.vue'),
+                    component: () => import('@/components/page/User/UserList.vue'),
                     meta: { title: '用户管理' }
                 },
                 {
                     path: '/role',
-                    component: () => import('@/components/page/RoleType.vue'),
+                    component: pageIndex,
                     children:[
                         {
-                            path: '/role/list',
-                            component: () => import('@/components/page/RoleList.vue'),
+                            path: 'list',
+                            component: () => import('@/components/page/Role/RoleList.vue'),
                             meta: { title: '角色列表' }
                         },
                         {
-                            path: '/role/type',
-                            component: () => import('@/components/page/RoleType.vue'),
+                            path: 'type',
+                            component: () => import('@/components/page/Role/RoleType.vue'),
                             meta: { title: '角色分类' }
                         },
                     ],
@@ -56,16 +57,16 @@ export default new Router({
             ]
         },
         {
-            path: '/login',
+            path: '/login',//登录
             component: () => import('@/components/page/Login.vue')
         },
         {
-            path: '/404',
-            component: () => import('@/components/page/404.vue')
+            path: '/404',//找不到页面
+            component: () => import('@/components/page//Error/404.vue')
         },
         {
-            path: '/403',
-            component: () => import('@/components/page/403.vue')
+            path: '/403',//无权限
+            component: () => import('@/components/page/Error/403.vue')
         },
         {
             path: '*',
