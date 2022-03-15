@@ -46,26 +46,46 @@
                         //发送登陆请求
                         let sendData=Object.assign({},this.ruleForm)
                         sendData.password=MD5(sendData.password);
-                        User.loginIn(sendData).then((res)=>{//登录用户
+                        User.loginIn2(sendData).then((res)=>{//登录用户(内置函数,免费)
                             console.log(res)
-                            if(res.status=="100"){//成功
+                            if(res){//成功
                                 this.$message({
                                     type: 'success',
-                                    message: res.message
+                                    message: '登录成功！'
                                 });
-                                //用户信息存入本地存储
-                                localStorage.setItem('ms_username',JSON.stringify(res.data));
+                                // //用户信息存入本地存储
+                                localStorage.setItem('ms_username',JSON.stringify(res));
                                 //跳转管理界面
                                 this.$router.push('/');
                             }else{//失败
                                 this.$message({
                                     type: 'error',
-                                    message: res.message
+                                    message: '登录失败！'
                                 });
                             }
                         }).catch(err => {
                             console.log(err)
                         });
+                        // User.loginIn(sendData).then((res)=>{//登录用户(自定义云函数,付费)
+                        //     console.log(res)
+                        //     if(res.status=="100"){//成功
+                        //         this.$message({
+                        //             type: 'success',
+                        //             message: res.message
+                        //         });
+                        //         //用户信息存入本地存储
+                        //         localStorage.setItem('ms_username',JSON.stringify(res.data));
+                        //         //跳转管理界面
+                        //         this.$router.push('/');
+                        //     }else{//失败
+                        //         this.$message({
+                        //             type: 'error',
+                        //             message: res.message
+                        //         });
+                        //     }
+                        // }).catch(err => {
+                        //     console.log(err)
+                        // });
                     }
                 });
             }

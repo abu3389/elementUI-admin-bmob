@@ -5,7 +5,7 @@
   "author": "abu <294333196@qq.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --open --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --open --hot --inline --progress --config build/webpack.dev.conf.js",
     "build": "node build/build.js",
     "build:dll": "webpack --config build/webpack.dll.conf.js"
   },
@@ -17,6 +17,7 @@
     "hydrogen-js-sdk": "^2.1.0",
     "js-md5": "^0.7.3",
     "mavon-editor": "^2.5.4",
+    "md5": "^2.2.1",
     "vue": "^2.5.16",
     "vue-cropperjs": "^2.2.0",
     "vue-router": "^3.0.1",
